@@ -10,13 +10,12 @@
 from tkinter import *
 from tkinter import filedialog
 from PyQt5 import QtCore, QtGui, QtWidgets
-import pygame
+import pygame, os, eyed3
 from pygame import mixer
 from pathlib import Path
 from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
 from mutagen.mp3 import MP3
-import os
-import eyed3
+from PyQt5.QtGui import QPixmap
 
 
 
@@ -26,7 +25,7 @@ class Ui_MainWindow(QWidget):
         #Main Window
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(550, 900)
-        MainWindow.setStyleSheet("background-image: url(:/img_source/img-src/main-bg.png);")
+        MainWindow.setStyleSheet("background-image: url(main-bg.png);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -38,6 +37,14 @@ class Ui_MainWindow(QWidget):
         self.label_ArtWork = QtWidgets.QLabel(self.centralwidget)
         self.label_ArtWork.setMinimumSize(QtCore.QSize(0, 300))
         self.label_ArtWork.setAlignment(QtCore.Qt.AlignCenter)
+        
+        """BLock of code to represent Artwork - WORKING"""
+        ''' pixmap = QPixmap('Temp_Image.jpg')
+        self.label_ArtWork.setPixmap(pixmap)
+        self.label_ArtWork.resize(pixmap.width(), pixmap.height())
+        #self.label_ArtWork.setCentralWidget(self.centralwidget)
+        #self.resize(pixmap.width(), pixmap.height()) '''
+                    
         self.label_ArtWork.setObjectName("label_ArtWork")
         self.verticalLayout.addWidget(self.label_ArtWork)
         spacerItem = QtWidgets.QSpacerItem(20, 10, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
@@ -141,12 +148,12 @@ class Ui_MainWindow(QWidget):
         self.actionNew.setObjectName("actionNew")
         self.actionOpen_File = QtWidgets.QAction(MainWindow)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/img_source/img-src/open.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("open.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionOpen_File.setIcon(icon)
         self.actionOpen_File.setObjectName("actionOpen_File")
         self.actionClose = QtWidgets.QAction(MainWindow)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap(":/img_source/img-src/close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap("close.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionClose.setIcon(icon1)
         self.actionClose.setObjectName("actionClose")
         self.menuFile.addAction(self.actionOpen_File)
@@ -163,7 +170,7 @@ class Ui_MainWindow(QWidget):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "iMusic Player"))
-        self.label_ArtWork.setText(_translate("MainWindow", "Artwork - Image"))
+        #self.label_ArtWork.setText(_translate("MainWindow", "Artwork - Photo"))
         self.label_CurrentSong.setText(_translate("MainWindow", ""))
         self.label_TimeForward.setText(_translate("MainWindow", "Time Forward"))
         self.label_TimeRemaining.setText(_translate("MainWindow", "Time Remaining"))
