@@ -10,11 +10,13 @@
 from tkinter import *
 from tkinter import filedialog
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import Qt
 import pygame, os, eyed3
 from pygame import mixer
 from pathlib import Path
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog, QFrame
 from mutagen.mp3 import MP3
+from mutagen.id3 import ID3,APIC
 from PyQt5.QtGui import QPixmap
 
 
@@ -36,14 +38,7 @@ class Ui_MainWindow(QWidget):
         #Label Art Work
         self.label_ArtWork = QtWidgets.QLabel(self.centralwidget)
         self.label_ArtWork.setMinimumSize(QtCore.QSize(0, 300))
-        self.label_ArtWork.setAlignment(QtCore.Qt.AlignCenter)
-        
-        """BLock of code to represent Artwork - WORKING"""
-        ''' pixmap = QPixmap('Temp_Image.jpg')
-        self.label_ArtWork.setPixmap(pixmap)
-        self.label_ArtWork.resize(pixmap.width(), pixmap.height())
-        #self.label_ArtWork.setCentralWidget(self.centralwidget)
-        #self.resize(pixmap.width(), pixmap.height()) '''
+        self.label_ArtWork.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)   
                     
         self.label_ArtWork.setObjectName("label_ArtWork")
         self.verticalLayout.addWidget(self.label_ArtWork)
@@ -196,6 +191,26 @@ class Ui_MainWindow(QWidget):
     
     def song_tag(self,Music_Name):
         song_tag = eyed3.load(Music_Name)
+        id3 = ID3(Music_Name)
+        artwork = id3.get('APIC:')
+        pixmap = QPixmap()
+        pixmap.loadFromData(artwork.data)
+        self.label_ArtWork.setPixmap(pixmap)
+        self.label_ArtWork.setAlignment(Qt.AlignCenter)
+        self.label_ArtWork.setScaledContents(False)
+        
+        # Scale down the pixmap to fit inside the QLabel while preserving aspect ratio
+        scaled_pixmap = pixmap.scaled(400, 400, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
+        # Set the scaled pixmap as the new pixmap for the QLabel
+        self.label_ArtWork.setPixmap(scaled_pixmap)
+
+        # Center the pixmap inside the QLabel
+        self.label_ArtWork.setAlignment(Qt.AlignCenter)
+        
+        #self.label_ArtWork.parent().layout().addWidget(self.label_ArtWork, 0, Qt.AlignCenter)
+
+
         self.label_CurrentSong.setText(song_tag.tag.title +' by '+ song_tag.tag.artist)
     
     def stop(self):
