@@ -18,6 +18,8 @@ from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFil
 from mutagen.mp3 import MP3
 from mutagen.id3 import ID3,APIC
 from PyQt5.QtGui import QPixmap
+from PyQt5.QtMultimedia import QAudioDeviceInfo, QAudioOutput
+from PyQt5.QtMultimedia import QAudioFormat, QAudioBuffer, QAudioInput
 
 
 
@@ -27,7 +29,7 @@ class Ui_MainWindow(QWidget):
         #Main Window
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(550, 900)
-        MainWindow.setStyleSheet("background-image: url(main-bg.png);")
+        #MainWindow.setStyleSheet("background-image: url(main-bg.png);")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(self.centralwidget)
@@ -38,7 +40,12 @@ class Ui_MainWindow(QWidget):
         #Label Art Work
         self.label_ArtWork = QtWidgets.QLabel(self.centralwidget)
         self.label_ArtWork.setMinimumSize(QtCore.QSize(0, 300))
-        self.label_ArtWork.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)   
+        self.label_ArtWork.setAlignment(QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter) 
+        default_artwork =  QPixmap("default-artwork.png").scaled(400,400)
+        self.label_ArtWork.setPixmap(default_artwork)
+        self.label_ArtWork.setScaledContents(True)
+        #pixmap = QPixmap(str(default_artwork)).sc aled(300, 300)
+        self.label_ArtWork.setPixmap(default_artwork)
                     
         self.label_ArtWork.setObjectName("label_ArtWork")
         self.verticalLayout.addWidget(self.label_ArtWork)
@@ -85,7 +92,7 @@ class Ui_MainWindow(QWidget):
         self.horizontalLayout.addWidget(self.button_Previous)
         spacerItem3 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem3)
-        
+    
         #Button Play / Pause
         self.button_PlayPause = QtWidgets.QPushButton(self.centralwidget)
         self.button_PlayPause.setObjectName("button_PlayPause")
@@ -93,7 +100,7 @@ class Ui_MainWindow(QWidget):
         spacerItem4 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem4)
         self.button_PlayPause.clicked.connect(self.Play_Pause)
-        
+    
         #Button Stop
         self.button_Stop = QtWidgets.QPushButton(self.centralwidget)
         self.button_Stop.setObjectName("button_Stop")
@@ -101,25 +108,51 @@ class Ui_MainWindow(QWidget):
         self.horizontalLayout.addWidget(self.button_Stop)
         spacerItem5 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem5)
-        
+    
         #Button Next
         self.button_Next = QtWidgets.QPushButton(self.centralwidget)
         self.button_Next.setObjectName("button_Next")
         self.horizontalLayout.addWidget(self.button_Next)
-        spacerItem6 = QtWidgets.QSpacerItem(10, 10, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        spacerItem6 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout.addItem(spacerItem6)
-        self.button_Next.clicked.connect(self.openFileNameDialog)
-        
+    
+        #Button Open
+        self.button_Open = QtWidgets.QPushButton(self.centralwidget)
+        self.button_Open.setObjectName("button_Open")
+        self.horizontalLayout.addWidget(self.button_Open)
+        spacerItem7 = QtWidgets.QSpacerItem(5, 5, QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem7)
+        self.button_Open.clicked.connect(self.openFileNameDialog)
+    
         #Dial Volume
         self.dial_Volume = QtWidgets.QDial(self.centralwidget)
         self.dial_Volume.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
         self.dial_Volume.setMaximum(100)
         self.dial_Volume.setObjectName("dial_Volume")
+        # get the default audio device
+        audio_device = QAudioDeviceInfo.defaultOutputDevice()
+
+        # create a QAudioOutput object with the default device
+        audio_output = QAudioOutput(audio_device, QAudioFormat())
+
+        # get the volume from the QAudioOutput object
+        current_value = audio_output.volume()
+        self.dial_Volume.setValue(int(current_value))
         self.dial_Volume.valueChanged.connect(self.set_volume)
+        self.dial_Volume.setFixedSize(80,80)
         self.horizontalLayout.addWidget(self.dial_Volume)
+        
+    
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+    
+        #Set Buttons Size
+        self.button_Previous.setFixedSize(80, 50)
+        self.button_PlayPause.setFixedSize(80, 50)
+        self.button_Stop.setFixedSize(80, 50)
+        self.button_Next.setFixedSize(80, 50)
+        self.button_Open.setFixedSize(80, 50)
         
         #List Widget
         self.listWidget_PlayList = QtWidgets.QListWidget(self.centralwidget)
@@ -173,6 +206,7 @@ class Ui_MainWindow(QWidget):
         self.button_PlayPause.setText(_translate("MainWindow", "Play"))
         self.button_Stop.setText(_translate("MainWindow", "Stop"))
         self.button_Next.setText(_translate("MainWindow", "Next"))
+        self.button_Open.setText(_translate("MainWindow", "Open"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionNew.setText(_translate("MainWindow", "New"))
         self.actionOpen_File.setText(_translate("MainWindow", "Open File"))
@@ -244,20 +278,21 @@ class Ui_MainWindow(QWidget):
     def openFileNameDialog(self):
         options = QFileDialog.Options()
         #options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;MP3 Files (*.mp3)", options=options)
-        if fileName:
-            for i in range(len(fileName)):
-                self.listWidget_PlayList.addItem(fileName[i])
+        fileNames, _ = QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;MP3 Files (*.mp3)", options=options)
+        if fileNames:
+            for fileName in fileNames:
+                self.listWidget_PlayList.addItem(fileName)
 
     def Add_Music(self):
         Playlist = self.listWidget_PlayList()
         path = filedialog.askdirectory()
         if path:
             os.chdir(path)
-            songs = os.listdire(path)
+            songs = os.listdir(path)
             for song in songs:
                 if song.endswith(".mp3"):
-                    Playlist.insert(END, song)
+                    full_path = os.path.join(path, song)
+                    Playlist.insert(END, full_path)
 
 #import images_source_rc
 
